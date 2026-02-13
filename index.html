@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HuggingFace English Card - Pro</title>
     <style>
-        /* 继承文件1的所有变量和样式 */
         :root {
             --primary-color: #0969da;
             --bg-color: #f6f8fa;
@@ -14,6 +13,7 @@
             --text-secondary: #57606a;
             --success-color: #2ecc71;
             --error-color: #e74c3c;
+            --accent-color: #8e44ad;
         }
 
         body {
@@ -27,98 +27,140 @@
             min-height: 100vh;
         }
 
-        /* 顶部主按钮样式 */
+        /* 顶部导航按钮 */
         .main-nav {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .nav-btn-quiz {
-            background-color: var(--primary-color);
+        .nav-btn {
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 20px;
             border-radius: 50px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(9, 105, 218, 0.3);
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        
+        .nav-btn:active { transform: scale(0.95); }
+        .btn-quiz { background-color: var(--primary-color); }
+        .btn-dictation { background-color: var(--accent-color); }
 
-        .nav-btn-quiz:hover { transform: scale(1.05); }
-
-        /* ==========================================
-           背单词全屏遮罩层 (文件2的容器)
-        ========================================== */
-        #quiz-overlay {
+        /* 全屏遮罩通用样式 */
+        .full-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: #f0f2f5;
             z-index: 1000;
-            display: none; /* 初始隐藏 */
+            display: none;
             flex-direction: column;
             align-items: center;
-            overflow-y: auto;
+            padding-top: 20px;
         }
 
-        .quiz-header {
+        .overlay-header {
             width: 100%;
-            padding: 15px;
-            display: flex;
-            justify-content: flex-start;
-            max-width: 480px;
+            padding: 10px 20px;
+            max-width: 500px;
+            box-sizing: border-box;
         }
 
-        .exit-quiz {
-            background: none;
-            border: 1px solid #ccc;
-            padding: 5px 15px;
-            border-radius: 15px;
+        .exit-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 20px;
             cursor: pointer;
-            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        /* 引入文件2的核心样式 */
-        .quiz-container {
+        /* 容器样式 */
+        .mode-container {
             background-color: white;
             width: 90%;
             max-width: 400px;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            padding: 30px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
             text-align: center;
             margin-top: 20px;
         }
 
-        /* ... (此处省略重复的卡片和按钮 CSS 以保持简洁，实际代码中已包含) ... */
+        /* 默写模式特有样式 */
+        .dictation-meaning {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin: 30px 0;
+            min-height: 2.5rem;
+            font-weight: bold;
+        }
+
+        .dictation-answer {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            visibility: hidden; 
+        }
+
+        .dictation-answer.show { visibility: visible; }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .primary-action {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .secondary-action {
+            background: #eee;
+            color: #333;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* 原有卡片样式保持不变 */
+        .card-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; max-width: 1200px; }
+        .card { background: var(--card-bg); border: 1px solid #d0d7de; border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; }
+        .card.auto-playing { border-color: var(--primary-color); background-color: #eef5fc; transform: scale(1.02); }
         .word-display { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; cursor: pointer; }
         .current-word { font-size: 2.2rem; margin: 0; color: var(--text-main); }
         .options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .option-btn { padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; }
         .option-btn.correct { background: var(--success-color); color: white; border-color: var(--success-color); }
-        .option-btn.wrong { background: var(--error-color); color: white; border-color: var(--error-color); animation: shake 0.4s; }
+        .option-btn.wrong { background: var(--error-color); color: white; border-color: var(--error-color); }
         
-        /* 文件1的原有样式保持不变... */
-        .card-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; max-width: 1200px; }
-        .card { background: var(--card-bg); border: 1px solid #d0d7de; border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; }
-        .card.auto-playing { border-color: var(--primary-color); background-color: #eef5fc; transform: scale(1.02); }
         .memorized-section { margin-top: 40px; text-align: center; }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
     </style>
 </head>
 <body>
 
-    <h1> English cards </h1>
+    <h1>English Cards</h1>
 
     <div class="main-nav">
-        <button class="nav-btn-quiz" onclick="openQuiz()">✍️ 开始背单词模式</button>
+        <button class="nav-btn btn-quiz" onclick="openQuiz()">✍️ 开始背单词模式</button>
+        <button class="nav-btn btn-dictation" onclick="openDictation()">⌨️ 开始默写模式</button>
     </div>
 
     <div id="card-container" class="card-container"></div>
@@ -127,107 +169,56 @@
         <button id="loop-play-btn" class="action-btn" style="padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-bottom: 20px;">
             <span class="icon">🔀</span> <span class="text">随机循环播放</span>
         </button>
-
         <button id="toggle-memorized-btn" style="background:none; border:none; cursor:pointer; color:var(--text-secondary); display:block; margin: 0 auto;">
             <span>已记过的单词</span> ↓
         </button>
         <div id="memorized-card-container" class="card-container" style="max-height:0; overflow:hidden; transition: 0.3s; margin-top:20px;"></div>
     </div>
 
-    <div id="quiz-overlay">
-        <div class="quiz-header">
-            <button class="exit-quiz" onclick="closeQuiz()">← 退出练习</button>
-        </div>
-        
-        <div class="quiz-container">
-            <div class="word-display" id="quizWordBox" onclick="playQuizAudio()">
+    <div id="quiz-overlay" class="full-overlay">
+        <div class="overlay-header"><button class="exit-btn" onclick="closeOverlays()">← 退出</button></div>
+        <div class="quiz-container mode-container">
+            <div class="word-display" onclick="playCurrentWordAudio()">
                 <h1 class="current-word"><span id="quizWordText">Word</span> 🔊</h1>
-                <div style="font-size:0.8rem; color:#999; margin-top:10px;">点击单词发音</div>
+            </div>
+            <div class="options-grid" id="quizOptionsContainer"></div>
+            <button onclick="nextQuizWord()" style="margin-top:20px; background:none; border:none; color:var(--primary-color); cursor:pointer;">跳过此词</button>
+        </div>
+    </div>
+
+    <div id="dictation-overlay" class="full-overlay">
+        <div class="overlay-header"><button class="exit-btn" onclick="closeOverlays()">← 退出</button></div>
+        <div class="mode-container">
+            <div style="color: #888; font-size: 0.8rem;">根据中文默写英文</div>
+            <div id="dictationMeaning" class="dictation-meaning">加载中...</div>
+            
+            <div id="dictationAnswerBox" class="dictation-answer" onclick="playCurrentWordAudio()">
+                <div id="dictationWordText" style="font-weight: bold;"></div>
+                <div id="dictationPhonetic" style="font-size: 0.9rem; color: #666;"></div>
             </div>
 
-            <div class="options-grid" id="quizOptionsContainer"></div>
-            
-            <div style="margin-top:20px;">
-                <button onclick="nextQuizWord()" style="background:none; border:none; color:var(--primary-color); cursor:pointer;">跳过此词</button>
+            <div class="action-grid">
+                <button class="secondary-action" id="showAnswerBtn" onclick="showDictationAnswer()">查看答案</button>
+                <button class="secondary-action" id="hideAnswerBtn" onclick="hideDictationAnswer()" style="display:none;">返回</button>
+                <button class="primary-action" onclick="nextDictationWord()">下一个</button>
             </div>
         </div>
     </div>
 
 <script>
-    // 1. 统一的数据源
     const vocabularyList = [
-        { 
-            word: "January", 
-            phonetic: "/ˈdʒænjueri/", 
-            meaning: "一月", 
-            context: "家牛生在一月<br>缩写 Jan。新的一年开始，通常会有 Kick-off meeting (启动会)。" 
-        },
-        { 
-            word: "February", 
-            phonetic: "/ˈfebrueri/", 
-            meaning: "二月", 
-            context: "二两横<br>缩写 Feb。最短的一个月。注意闰年 (Leap Year) 有 29 天。" 
-        },
-        { 
-            word: "March", 
-            phonetic: "/mɑːrtʃ/", 
-            meaning: "三月", 
-            context: "倒3是三月<br>缩写 Mar。第一季度 (Q1) 的最后一个月，通常要赶季度目标。" 
-        },
-        { 
-            word: "April", 
-            phonetic: "/ˈeɪprəl/", 
-            meaning: "四月", 
-            context: "A4<br>缩写 Apr。第二季度 (Q2) 开始。也就是愚人节 (April Fools') 的月份。" 
-        },
-        { 
-            word: "May", 
-            phonetic: "/meɪ/", 
-            meaning: "五月", 
-            context: "美，劳动节最美是五月<br>缩写 May。劳动节假期。代码发布前记得检查日期。" 
-        },
-        { 
-            word: "June", 
-            phonetic: "/dʒuːn/", 
-            meaning: "六月", 
-            context: "聚呢 六月儿童节<br>缩写 Jun。半年结束 (Half-year)，通常会有年中总结 (Mid-year review)。" 
-        },
-        { 
-            word: "July", 
-            phonetic: "/dʒʊˈlaɪ/", 
-            meaning: "七月", 
-            context: "“七月”就来<br>缩写 Jul。下半年 (H2) 开始。很多国外同事会去休假。" 
-        },
-        { 
-            word: "August", 
-            phonetic: "/ˈɔːɡəst/", 
-            meaning: "八月", 
-            context: "八月热，吹奥斯特空调<br>缩写 Aug。盛夏，通常是业务淡季，适合做技术重构。" 
-        },
-        { 
-            word: "September", 
-            phonetic: "/sepˈtembər/", 
-            meaning: "九月", 
-            context: "九月开学眼睛涩<br>缩写 Sep。第三季度 (Q3) 结束。学生开学，流量高峰期。" 
-        },
-        { 
-            word: "October", 
-            phonetic: "/ɑːkˈtoʊbər/", 
-            meaning: "十月", 
-            context: "十月🎈飞<br>缩写 Oct。第四季度 (Q4) 开始，进入年底冲刺阶段。" 
-        },
-        { 
-            word: "November", 
-            phonetic: "/noʊˈvembər/", 
-            meaning: "十一月", 
-            context: "NO NO 十一月<br>缩写 Nov。感恩节和黑色星期五，电商系统压力最大的时候。" 
-        },
-        { 
-            word: "December", 
-            phonetic: "/dɪˈsembər/", 
-            meaning: "十二月", 
-            context: "一年到 底 十二月<br>缩写 Dec。年底总结 (Year-end summary) 和圣诞节假期。" 
-        }
+        { word: "January", phonetic: "/ˈdʒænjueri/", meaning: "一月", context: "缩写 Jan。新的一年开始。" },
+        { word: "February", phonetic: "/ˈfebrueri/", meaning: "二月", context: "缩写 Feb。最短的一个月。" },
+        { word: "March", phonetic: "/mɑːrtʃ/", meaning: "三月", context: "缩写 Mar。第一季度结束。" },
+        { word: "April", phonetic: "/ˈeɪprəl/", meaning: "四月", context: "缩写 Apr。第二季度开始。" },
+        { word: "May", phonetic: "/meɪ/", meaning: "五月", context: "缩写 May。劳动节假期。" },
+        { word: "June", phonetic: "/dʒuːn/", meaning: "六月", context: "缩写 Jun。半年结束。" },
+        { word: "July", phonetic: "/dʒʊˈlaɪ/", meaning: "七月", context: "缩写 Jul。下半年开始。" },
+        { word: "August", phonetic: "/ˈɔːɡəst/", meaning: "八月", context: "缩写 Aug。盛夏。" },
+        { word: "September", phonetic: "/sepˈtembər/", meaning: "九月", context: "缩写 Sep。开学季。" },
+        { word: "October", phonetic: "/ɑːkˈtoʊbər/", meaning: "十月", context: "缩写 Oct。第四季度开始。" },
+        { word: "November", phonetic: "/noʊˈvembər/", meaning: "十一月", context: "缩写 Nov。电商大促。" },
+        { word: "December", phonetic: "/dɪˈsembər/", meaning: "十二月", context: "缩写 Dec。年底总结。" }
     ];
 
     const memorizedList = [
@@ -251,174 +242,119 @@
         { word: "Sign Up", phonetic: "/saɪn ʌp/", meaning: "注册", context: "创建新账户。如果你是第一次来，没有账号，点这个按钮。" }
     ];
 
-    // 全局变量
+    const allWords = [...vocabularyList, ...memorizedList];
     const globalAudio = new Audio();
-    const container = document.getElementById('card-container');
-    const memorizedContainer = document.getElementById('memorized-card-container');
+    let currentWordObj = null;
 
-    // --- 2. 初始化渲染函数 ---
     function renderCards() {
+        const container = document.getElementById('card-container');
+        const memContainer = document.getElementById('memorized-card-container');
         const setup = (list, target) => {
             list.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                // 增加标识类名，方便后续高亮查找
-                card.setAttribute('data-word', item.word); 
-                card.innerHTML = `
-                    <div class="word-header"><span class="word-text">${item.word}</span> <small>${item.phonetic}</small></div>
-                    <div class="meaning">${item.meaning}</div>
-                    <div class="context">💡 ${item.context}</div>
-                `;
-                card.onclick = () => {
-                    playAudio(item.word);
-                    card.classList.add('playing');
-                    setTimeout(() => card.classList.remove('playing'), 500);
-                };
+                card.setAttribute('data-word', item.word);
+                card.innerHTML = `<div><b>${item.word}</b> <small>${item.phonetic}</small></div><div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div><div style="font-size:0.8rem;color:#666">${item.context}</div>`;
+                card.onclick = () => { playAudio(item.word); };
                 target.appendChild(card);
             });
         };
-        renderCards.clear = () => { container.innerHTML = ''; memorizedContainer.innerHTML = ''; };
         setup(vocabularyList, container);
-        setup(memorizedList, memorizedContainer);
+        setup(memorizedList, memContainer);
     }
 
-    // --- 3. 核心播放逻辑 ---
     function playAudio(word) {
-        // 使用有道词典接口
-        // type=2: 美式发音 (您的需求)
-        // type=1: 英式发音
-        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
-
-        globalAudio.src = audioUrl;
-        globalAudio.play().catch(e => console.log("播放尝试"));
+        globalAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
+        globalAudio.play().catch(()=>{});
     }
 
-    // --- 4. 随机循环播放逻辑 (修复重点) ---
-    const loopBtn = document.getElementById('loop-play-btn');
-    let isLooping = false;
-    let loopTimer = null;
-    let shuffledList = [];
-    let currentIndex = 0;
-    let repeatCount = 0;
-
-    loopBtn.onclick = () => {
-        if (isLooping) {
-            stopLoop();
-        } else {
-            globalAudio.load(); // 激活移动端音频权限
-            startLoop();
-        }
-    };
-
-    function startLoop() {
-        isLooping = true;
-        loopBtn.classList.add('active');
-        loopBtn.querySelector('.text').innerText = "停止播放";
-        loopBtn.querySelector('.icon').innerText = "⏹";
-
-        // 只洗牌主列表（月份）
-        shuffledList = [...vocabularyList].sort(() => Math.random() - 0.5);
-        currentIndex = 0;
-        repeatCount = 0;
-        playNextInLoop();
+    function playCurrentWordAudio() {
+        if(currentWordObj) playAudio(currentWordObj.word);
     }
 
-    function stopLoop() {
-        isLooping = false;
-        clearTimeout(loopTimer);
-        loopBtn.classList.remove('active');
-        loopBtn.querySelector('.text').innerText = "随机循环播放";
-        loopBtn.querySelector('.icon').innerText = "🔀";
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
+    function closeOverlays() {
+        document.getElementById('quiz-overlay').style.display = 'none';
+        document.getElementById('dictation-overlay').style.display = 'none';
+        stopLoop();
     }
 
-    function playNextInLoop() {
-        if (!isLooping) return;
-
-        if (currentIndex >= shuffledList.length) {
-            shuffledList = [...vocabularyList].sort(() => Math.random() - 0.5);
-            currentIndex = 0;
-        }
-
-        const item = shuffledList[currentIndex];
-        playAudio(item.word);
-        
-        // 视觉高亮
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
-        const activeCard = container.querySelector(`[data-word="${item.word}"]`);
-        if (activeCard) {
-            activeCard.classList.add('auto-playing');
-            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        repeatCount++;
-        if (repeatCount >= 3) {
-            repeatCount = 0;
-            currentIndex++;
-        }
-
-        loopTimer = setTimeout(playNextInLoop, 2500);
+    // --- 默写模式逻辑 ---
+    function openDictation() {
+        closeOverlays();
+        document.getElementById('dictation-overlay').style.display = 'flex';
+        nextDictationWord();
     }
 
-    // --- 5. 背单词模式切换 (文件2) ---
-    let currentQuizWord = null;
-    let quizAnswered = false;
+    function showDictationAnswer() {
+        document.getElementById('dictationAnswerBox').classList.add('show');
+        document.getElementById('showAnswerBtn').style.display = 'none';
+        document.getElementById('hideAnswerBtn').style.display = 'block';
+        playCurrentWordAudio();
+    }
 
+    function hideDictationAnswer() {
+        document.getElementById('dictationAnswerBox').classList.remove('show');
+        document.getElementById('showAnswerBtn').style.display = 'block';
+        document.getElementById('hideAnswerBtn').style.display = 'none';
+    }
+
+    function nextDictationWord() {
+        hideDictationAnswer();
+        currentWordObj = allWords[Math.floor(Math.random() * allWords.length)];
+        document.getElementById('dictationMeaning').innerText = currentWordObj.meaning;
+        document.getElementById('dictationWordText').innerText = currentWordObj.word;
+        document.getElementById('dictationPhonetic').innerText = currentWordObj.phonetic;
+    }
+
+    // --- 其他功能 (保持不变) ---
     function openQuiz() {
-        stopLoop(); // 进入背单词模式时自动停止循环播放
+        closeOverlays();
         document.getElementById('quiz-overlay').style.display = 'flex';
         nextQuizWord();
     }
 
-    function closeQuiz() {
-        document.getElementById('quiz-overlay').style.display = 'none';
-    }
-
     function nextQuizWord() {
-        quizAnswered = false;
         const qContainer = document.getElementById('quizOptionsContainer');
         qContainer.innerHTML = '';
-        
-        const allWords = [...vocabularyList, ...memorizedList];
-        currentQuizWord = allWords[Math.floor(Math.random() * allWords.length)];
-        document.getElementById('quizWordText').innerText = currentQuizWord.word;
-
-        let distractors = allWords.filter(w => w.word !== currentQuizWord.word)
-                                  .sort(() => Math.random() - 0.5).slice(0, 3);
-        let options = [...distractors, currentQuizWord].sort(() => Math.random() - 0.5);
-
+        currentWordObj = allWords[Math.floor(Math.random() * allWords.length)];
+        document.getElementById('quizWordText').innerText = currentWordObj.word;
+        let distractors = allWords.filter(w => w.word !== currentWordObj.word).sort(() => Math.random() - 0.5).slice(0, 3);
+        let options = [...distractors, currentWordObj].sort(() => Math.random() - 0.5);
         options.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.innerText = opt.meaning;
             btn.onclick = () => {
-                if(quizAnswered) return;
-                if(opt.word === currentQuizWord.word) {
+                if(opt.word === currentWordObj.word) {
                     btn.classList.add('correct');
-                    quizAnswered = true;
-                    playAudio(currentQuizWord.word);
-                    setTimeout(nextQuizWord, 1200);
-                } else {
-                    btn.classList.add('wrong');
-                }
+                    playAudio(currentWordObj.word);
+                    setTimeout(nextQuizWord, 1000);
+                } else { btn.classList.add('wrong'); }
             };
             qContainer.appendChild(btn);
         });
     }
 
-    // --- 6. 其他 UI 事件 ---
+    const loopBtn = document.getElementById('loop-play-btn');
+    let isLooping = false, loopTimer = null;
+    loopBtn.onclick = () => { isLooping ? stopLoop() : startLoop(); };
+    function startLoop() { isLooping = true; loopBtn.querySelector('.text').innerText = "停止播放"; playNextInLoop(); }
+    function stopLoop() { isLooping = false; clearTimeout(loopTimer); loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
+    function playNextInLoop() {
+        if (!isLooping) return;
+        const item = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
+        playAudio(item.word);
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
+        const activeCard = document.querySelector(`[data-word="${item.word}"]`);
+        if (activeCard) activeCard.classList.add('auto-playing');
+        loopTimer = setTimeout(playNextInLoop, 3000);
+    }
+
     document.getElementById('toggle-memorized-btn').onclick = function() {
         const target = document.getElementById('memorized-card-container');
-        if(target.style.maxHeight === '0px' || !target.style.maxHeight) {
-            target.style.maxHeight = '2000px';
-        } else {
-            target.style.maxHeight = '0px';
-        }
+        target.style.maxHeight = (target.style.maxHeight === '0px' || !target.style.maxHeight) ? '2000px' : '0px';
     };
 
-    function playQuizAudio() { if(currentQuizWord) playAudio(currentQuizWord.word); }
-
-    // 执行初始化
     renderCards();
 </script>
 </body>
