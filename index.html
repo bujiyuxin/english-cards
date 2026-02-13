@@ -241,7 +241,7 @@
         { word: "Face", phonetic: "/feɪs/", meaning: "脸", context: "品牌名 Hugging Face 的后半部分。在 AI 领域，你也经常会听到 'Face Detection' (人脸识别) 这个词。" },
         { word: "Language", phonetic: "/ˈlæŋɡwɪdʒ/", meaning: "语言", context: "网站核心筛选条件。虽然界面上常显示复数 Languages，但单数指具体的某一种语言（如 Chinese, Python）。" },
         { word: "Model", phonetic: "/ˈmɑːdl/", meaning: "模型", context: "导航栏第一项。点击这里浏览所有可下载的 AI 模型库（如 Llama, BERT）。" },
-        { word: "dataset", phonetic: "/ˈdeɪtəset/", meaning: "数据集", context: "AI 的'粮食'。这里有海量用于训练模型的文本、图片和音频数据。" },
+        { word: "Dataset", phonetic: "/ˈdeɪtəset/", meaning: "数据集", context: "AI 的'粮食'。这里有海量用于训练模型的文本、图片和音频数据。" },
         { word: "Space", phonetic: "/speɪs/", meaning: "空间 / 应用展示", context: "在线运行 AI 的地方。不需要写代码，点进去就能直接玩各种 AI Demo。" },
         { word: "Community", phonetic: "/kəˈmjuːnəti/", meaning: "社区", context: "讨论区。你可以在这里提问、参与讨论，或者查看最新的开源活动。" },
         { word: "Docs", phonetic: "/dɑːks/", meaning: "文档 (Documentation)", context: "说明书。不懂代码怎么写？不懂 API 怎么调？技术问题的答案全在这里。" },
@@ -284,11 +284,11 @@
 
     // --- 3. 核心播放逻辑 ---
     function playAudio(word) {
-        if (word && word.toLowerCase().replace(/\s/g, '') === 'dataset') {
-            audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=dataset&tl=en&client=tw-ob`;
-        } else {
-            audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
-        }
+        // 使用有道词典接口
+        // type=2: 美式发音 (您的需求)
+        // type=1: 英式发音
+        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
+
         globalAudio.src = audioUrl;
         globalAudio.play().catch(e => console.log("播放尝试"));
     }
