@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <meta name="theme-color" content="#f6f8fa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HuggingFace English Card - Pro</title>
@@ -16,15 +20,30 @@
             --accent-color: #8e44ad;
         }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* 深色模式变量 - 适配 iOS/macOS 标准深色 */
+                --bg-color: #0d1117;
+                --card-bg: #161b22;
+                --text-main: #c9d1d9;
+                --text-secondary: #8b949e;
+                --primary-color: #58a6ff;
+                --border-color: #30363d;
+                --subtle-bg: #21262d;
+            }
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
+            color: var(--text-main); /* 确保全局文字颜色跟随 */
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s; /* 平滑过渡效果 */
         }
 
         /* 顶部导航按钮 */
@@ -56,7 +75,7 @@
         .full-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #f0f2f5;
+            background-color: var(--bg-color);
             z-index: 1000;
             display: none;
             flex-direction: column;
@@ -82,12 +101,12 @@
 
         /* 容器样式 */
         .mode-container {
-            background-color: white;
+            background-color: var(--card-bg); /* 改为变量 */
             width: 90%;
             max-width: 400px;
             padding: 30px 20px;
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); /* 深色下投影加重 */
             text-align: center;
             margin-top: 20px;
         }
@@ -106,7 +125,7 @@
             color: var(--primary-color);
             margin: 20px 0;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--subtle-bg); /* 改为变量 */
             border-radius: 12px;
             visibility: hidden; 
         }
@@ -121,8 +140,8 @@
         }
 
         .primary-action {
-            background: var(--primary-color);
-            color: white;
+            background: var(--subtle-bg); /* 改为变量 */
+            color: var(--text-main); /* 改为变量 */
             border: none;
             padding: 15px;
             border-radius: 12px;
@@ -140,9 +159,13 @@
             font-weight: 500;
         }
 
+        .nav-btn:active, .primary-action:active {
+            opacity: 0.8;
+        }
+
         /* 原有卡片样式保持不变 */
         .card-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; max-width: 1200px; }
-        .card { background: var(--card-bg); border: 1px solid #d0d7de; border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; }
         .card.auto-playing { border-color: var(--primary-color); background-color: #eef5fc; transform: scale(1.02); }
         .word-display { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; cursor: pointer; }
         .current-word { font-size: 2.2rem; margin: 0; color: var(--text-main); }
@@ -337,18 +360,73 @@
 
     const loopBtn = document.getElementById('loop-play-btn');
     let isLooping = false, loopTimer = null;
-    loopBtn.onclick = () => { isLooping ? stopLoop() : startLoop(); };
+    let shuffledList = [];
+    let currentIndex = 0;
+    let repeatCount = 0;
+
+    loopBtn.onclick = () => {
+        if (isLooping) {
+            stopLoop();
+        } else {
+            globalAudio.load(); // 激活移动端音频权限
+            startLoop();
+        }
+    };
+
     function startLoop() { isLooping = true; loopBtn.querySelector('.text').innerText = "停止播放"; playNextInLoop(); }
-    function stopLoop() { isLooping = false; clearTimeout(loopTimer); loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
-    function playNextInLoop() {
-        if (!isLooping) return;
-        const item = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
-        playAudio(item.word);
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
-        const activeCard = document.querySelector(`[data-word="${item.word}"]`);
-        if (activeCard) activeCard.classList.add('auto-playing');
-        loopTimer = setTimeout(playNextInLoop, 3000);
+    function stopLoop() { isLooping = false; clearTimeout(loopTimer);repeatCount = 0; loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
+// ... 之前的代码保持不变 ...
+
+let currentLoopWord = null; // 用于锁定当前正在循环的单词
+
+function playNextInLoop() {
+    if (!isLooping) return;
+    
+    const container = document.getElementById('card-container');
+
+    // --- 修改逻辑开始 ---
+    // 只有当 repeatCount 为 0 时，才随机抽取一个新单词
+    if (repeatCount === 0) {
+        currentLoopWord = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
     }
+    
+    const item = currentLoopWord; // 使用锁定的单词
+    playAudio(item.word);
+    
+    // 处理 UI 高亮
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
+    const activeCard = container.querySelector(`[data-word="${item.word}"]`);
+    if (activeCard) {
+        activeCard.classList.add('auto-playing');
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    repeatCount++; // 累加播放次数
+    
+    // 如果播满了 3 次，重置计数器，下次进入函数时会重新选词
+    if (repeatCount >= 3) {
+        repeatCount = 0;
+        currentIndex++; // 记录已完成的组数（可选）
+    }
+    // --- 修改逻辑结束 ---
+
+    // 建议：循环播放同一个词时，间隔可以稍微短一点（如 2000ms），换词时稍微长一点
+    loopTimer = setTimeout(playNextInLoop, 2500);
+}
+
+// 修改 openQuiz 增加重置逻辑
+function openQuiz() {
+    closeOverlays();
+    document.getElementById('quiz-overlay').style.display = 'flex';
+    nextQuizWord();
+}
+
+// 确保退出时停止所有计时器
+function closeOverlays() {
+    document.getElementById('quiz-overlay').style.display = 'none';
+    document.getElementById('dictation-overlay').style.display = 'none';
+    stopLoop(); // 这是一个好的习惯
+}
 
     document.getElementById('toggle-memorized-btn').onclick = function() {
         const target = document.getElementById('memorized-card-container');
