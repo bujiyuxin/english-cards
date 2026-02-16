@@ -10,6 +10,7 @@
     <title>HuggingFace English Card - Pro</title>
     <style>
         :root {
+            /* 浅色模式变量 */
             --primary-color: #0969da;
             --bg-color: #f6f8fa;
             --card-bg: #ffffff;
@@ -18,6 +19,10 @@
             --success-color: #2ecc71;
             --error-color: #e74c3c;
             --accent-color: #8e44ad;
+            --border-color: #d0d7de;
+            --subtle-bg: #f8f9fa;
+            --btn-secondary-bg: #eeeeee;
+            --btn-secondary-text: #333333;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -30,21 +35,25 @@
                 --primary-color: #58a6ff;
                 --border-color: #30363d;
                 --subtle-bg: #21262d;
+                --btn-secondary-bg: #30363d;
+                --btn-secondary-text: #c9d1d9;
             }
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-main); /* 确保全局文字颜色跟随 */
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            transition: background-color 0.3s, color 0.3s; /* 平滑过渡效果 */
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        h1 { color: var(--text-main); }
 
         /* 顶部导航按钮 */
         .main-nav {
@@ -90,9 +99,11 @@
             box-sizing: border-box;
         }
 
+        /* 修复：退出按钮深色适配 */
         .exit-btn {
-            background: white;
-            border: 1px solid #ddd;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
             padding: 8px 15px;
             border-radius: 20px;
             cursor: pointer;
@@ -101,17 +112,16 @@
 
         /* 容器样式 */
         .mode-container {
-            background-color: var(--card-bg); /* 改为变量 */
+            background-color: var(--card-bg);
             width: 90%;
             max-width: 400px;
             padding: 30px 20px;
             border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3); /* 深色下投影加重 */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             text-align: center;
             margin-top: 20px;
         }
 
-        /* 默写模式特有样式 */
         .dictation-meaning {
             font-size: 1.8rem;
             color: var(--text-main);
@@ -125,7 +135,7 @@
             color: var(--primary-color);
             margin: 20px 0;
             padding: 15px;
-            background: var(--subtle-bg); /* 改为变量 */
+            background: var(--subtle-bg);
             border-radius: 12px;
             visibility: hidden; 
         }
@@ -139,9 +149,10 @@
             margin-top: 30px;
         }
 
+        /* 修复：主/次操作按钮适配 */
         .primary-action {
-            background: var(--subtle-bg); /* 改为变量 */
-            color: var(--text-main); /* 改为变量 */
+            background: var(--primary-color);
+            color: white;
             border: none;
             padding: 15px;
             border-radius: 12px;
@@ -150,8 +161,8 @@
         }
 
         .secondary-action {
-            background: #eee;
-            color: #333;
+            background: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
             border: none;
             padding: 15px;
             border-radius: 12px;
@@ -159,22 +170,42 @@
             font-weight: 500;
         }
 
-        .nav-btn:active, .primary-action:active {
+        .nav-btn:active, .primary-action:active, .secondary-action:active {
             opacity: 0.8;
         }
 
-        /* 原有卡片样式保持不变 */
+        /* 原有卡片样式 */
         .card-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; width: 100%; max-width: 1200px; }
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; }
-        .card.auto-playing { border-color: var(--primary-color); background-color: #eef5fc; transform: scale(1.02); }
-        .word-display { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; cursor: pointer; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; width: 260px; cursor: pointer; position: relative; color: var(--text-main); }
+        
+        /* 修复：循环播放高亮色在深色模式下更柔和 */
+        @media (prefers-color-scheme: dark) {
+            .card.auto-playing { border-color: var(--primary-color); background-color: #1c2d3e; transform: scale(1.02); }
+        }
+        @media (prefers-color-scheme: light) {
+            .card.auto-playing { border-color: var(--primary-color); background-color: #eef5fc; transform: scale(1.02); }
+        }
+
+        .word-display { margin: 20px 0; padding: 20px; background: var(--subtle-bg); border-radius: 12px; cursor: pointer; }
         .current-word { font-size: 2.2rem; margin: 0; color: var(--text-main); }
         .options-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .option-btn { padding: 15px; border: 2px solid #e0e0e0; border-radius: 12px; background: white; cursor: pointer; font-size: 1rem; }
+        
+        /* 修复：背单词选项按钮适配 */
+        .option-btn { 
+            padding: 15px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 12px; 
+            background: var(--card-bg); 
+            color: var(--text-main);
+            cursor: pointer; 
+            font-size: 1rem; 
+            transition: all 0.2s;
+        }
         .option-btn.correct { background: var(--success-color); color: white; border-color: var(--success-color); }
         .option-btn.wrong { background: var(--error-color); color: white; border-color: var(--error-color); }
         
         .memorized-section { margin-top: 40px; text-align: center; }
+        #loop-play-btn { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -205,19 +236,19 @@
                 <h1 class="current-word"><span id="quizWordText">Word</span> 🔊</h1>
             </div>
             <div class="options-grid" id="quizOptionsContainer"></div>
-            <button onclick="nextQuizWord()" style="margin-top:20px; background:none; border:none; color:var(--primary-color); cursor:pointer;">跳过此词</button>
+            <button onclick="nextQuizWord()" style="margin-top:20px; background:none; border:none; color:var(--primary-color); cursor:pointer; font-weight:bold;">跳过此词</button>
         </div>
     </div>
 
     <div id="dictation-overlay" class="full-overlay">
         <div class="overlay-header"><button class="exit-btn" onclick="closeOverlays()">← 退出</button></div>
         <div class="mode-container">
-            <div style="color: #888; font-size: 0.8rem;">根据中文默写英文</div>
+            <div style="color: var(--text-secondary); font-size: 0.8rem;">根据中文默写英文</div>
             <div id="dictationMeaning" class="dictation-meaning">加载中...</div>
             
             <div id="dictationAnswerBox" class="dictation-answer" onclick="playCurrentWordAudio()">
                 <div id="dictationWordText" style="font-weight: bold;"></div>
-                <div id="dictationPhonetic" style="font-size: 0.9rem; color: #666;"></div>
+                <div id="dictationPhonetic" style="font-size: 0.9rem; color: var(--text-secondary);"></div>
             </div>
 
             <div class="action-grid">
@@ -229,6 +260,7 @@
     </div>
 
 <script>
+    // 数据部分保持不变
     const vocabularyList = [
         { word: "January", phonetic: "/ˈdʒænjueri/", meaning: "一月", context: "缩写 Jan。新的一年开始。" },
         { word: "February", phonetic: "/ˈfebrueri/", meaning: "二月", context: "缩写 Feb。最短的一个月。" },
@@ -272,12 +304,14 @@
     function renderCards() {
         const container = document.getElementById('card-container');
         const memContainer = document.getElementById('memorized-card-container');
+        container.innerHTML = '';
+        memContainer.innerHTML = '';
         const setup = (list, target) => {
             list.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('data-word', item.word);
-                card.innerHTML = `<div><b>${item.word}</b> <small>${item.phonetic}</small></div><div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div><div style="font-size:0.8rem;color:#666">${item.context}</div>`;
+                card.innerHTML = `<div><b>${item.word}</b> <small>${item.phonetic}</small></div><div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div><div style="font-size:0.8rem;color:var(--text-secondary)">${item.context}</div>`;
                 card.onclick = () => { playAudio(item.word); };
                 target.appendChild(card);
             });
@@ -301,7 +335,6 @@
         stopLoop();
     }
 
-    // --- 默写模式逻辑 ---
     function openDictation() {
         closeOverlays();
         document.getElementById('dictation-overlay').style.display = 'flex';
@@ -329,7 +362,6 @@
         document.getElementById('dictationPhonetic').innerText = currentWordObj.phonetic;
     }
 
-    // --- 其他功能 (保持不变) ---
     function openQuiz() {
         closeOverlays();
         document.getElementById('quiz-overlay').style.display = 'flex';
@@ -360,73 +392,39 @@
 
     const loopBtn = document.getElementById('loop-play-btn');
     let isLooping = false, loopTimer = null;
-    let shuffledList = [];
-    let currentIndex = 0;
     let repeatCount = 0;
+    let currentLoopWord = null;
 
     loopBtn.onclick = () => {
         if (isLooping) {
             stopLoop();
         } else {
-            globalAudio.load(); // 激活移动端音频权限
+            globalAudio.load();
             startLoop();
         }
     };
 
     function startLoop() { isLooping = true; loopBtn.querySelector('.text').innerText = "停止播放"; playNextInLoop(); }
-    function stopLoop() { isLooping = false; clearTimeout(loopTimer);repeatCount = 0; loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
-// ... 之前的代码保持不变 ...
+    function stopLoop() { isLooping = false; clearTimeout(loopTimer); repeatCount = 0; loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
 
-let currentLoopWord = null; // 用于锁定当前正在循环的单词
-
-function playNextInLoop() {
-    if (!isLooping) return;
-    
-    const container = document.getElementById('card-container');
-
-    // --- 修改逻辑开始 ---
-    // 只有当 repeatCount 为 0 时，才随机抽取一个新单词
-    if (repeatCount === 0) {
-        currentLoopWord = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
+    function playNextInLoop() {
+        if (!isLooping) return;
+        const container = document.getElementById('card-container');
+        if (repeatCount === 0) {
+            currentLoopWord = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
+        }
+        const item = currentLoopWord;
+        playAudio(item.word);
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
+        const activeCard = container.querySelector(`[data-word="${item.word}"]`);
+        if (activeCard) {
+            activeCard.classList.add('auto-playing');
+            activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        repeatCount++;
+        if (repeatCount >= 3) { repeatCount = 0; }
+        loopTimer = setTimeout(playNextInLoop, 2500);
     }
-    
-    const item = currentLoopWord; // 使用锁定的单词
-    playAudio(item.word);
-    
-    // 处理 UI 高亮
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
-    const activeCard = container.querySelector(`[data-word="${item.word}"]`);
-    if (activeCard) {
-        activeCard.classList.add('auto-playing');
-        activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    repeatCount++; // 累加播放次数
-    
-    // 如果播满了 3 次，重置计数器，下次进入函数时会重新选词
-    if (repeatCount >= 3) {
-        repeatCount = 0;
-        currentIndex++; // 记录已完成的组数（可选）
-    }
-    // --- 修改逻辑结束 ---
-
-    // 建议：循环播放同一个词时，间隔可以稍微短一点（如 2000ms），换词时稍微长一点
-    loopTimer = setTimeout(playNextInLoop, 2500);
-}
-
-// 修改 openQuiz 增加重置逻辑
-function openQuiz() {
-    closeOverlays();
-    document.getElementById('quiz-overlay').style.display = 'flex';
-    nextQuizWord();
-}
-
-// 确保退出时停止所有计时器
-function closeOverlays() {
-    document.getElementById('quiz-overlay').style.display = 'none';
-    document.getElementById('dictation-overlay').style.display = 'none';
-    stopLoop(); // 这是一个好的习惯
-}
 
     document.getElementById('toggle-memorized-btn').onclick = function() {
         const target = document.getElementById('memorized-card-container');
