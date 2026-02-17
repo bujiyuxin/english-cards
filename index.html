@@ -297,42 +297,35 @@
     let isAudioUnlocked = false; // 音频锁开关
 
     // 核心改进：播放函数
-    function playAudio(word) {
+function playAudio(word) {
         if (!word) return;
-        
+
+        // 1. 停止当前播放并清空旧资源
         globalAudio.pause();
+        globalAudio.src = "";
+
+        // 2. 对单词进行编码，确保空格处理正确
         const encodedWord = encodeURIComponent(word.trim());
 
-        // 统一使用 HTTPS 接口，提高兼容性
-        const sources = [
-            // `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`,
-            `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodedWord}`,
-            // `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
-        ];
+        // 3. 使用有道美式英语接口（type=2 表示美音，这是目前最稳定的美式接口）
+        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`;
 
-        let sourceIndex = 0;
+        // 4. 赋值并强制加载
+        globalAudio.src = youdaoUrl;
+        globalAudio.load();
 
-        const tryPlay = (index) => {
-            if (index >= sources.length) {
-                console.error("所有语音源均失效");
-                return;
-            }
+        // 5. 尝试播放
+        const playPromise = globalAudio.play();
 
-            globalAudio.src = sources[index];
-            globalAudio.load(); // 强制重新加载，解决移动端不更新音频源的问题
-
-            const playPromise = globalAudio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    isAudioUnlocked = true; // 播放成功即解锁
-                }).catch(error => {
-                    console.warn(`源 ${index} 播放失败，尝试切换...`);
-                    tryPlay(index + 1);
-                });
-            }
-        };
-
-        tryPlay(sourceIndex);
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // 如果在线接口都失败（比如没网），最后启用本地内置引擎保底
+                console.warn("在线接口失败，启用系统语音保底");
+                const msg = new SpeechSynthesisUtterance(word);
+                msg.lang = 'en-US';
+                window.speechSynthesis.speak(msg);
+            });
+        }
     }
 
     // 页面交互时解锁音频（针对 iOS/安卓）
