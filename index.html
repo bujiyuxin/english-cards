@@ -260,7 +260,6 @@
     </div>
 
 <script>
-// 数据部分保持不变
     const vocabularyList = [
         { word: "Wake up", phonetic: "/weɪk ʌp/", meaning: "醒来", context: "早晨睁开眼的第一步。" },
         { word: "Brush your teeth", phonetic: "/brʌʃ jɔːr tiːθ/", meaning: "刷牙", context: "洗漱间的日常清洁。" },
@@ -277,7 +276,7 @@
         { word: "Hold my hand", phonetic: "/hoʊld maɪ hænd/", meaning: "牵我的手", context: "走在路上注意安全。" },
         { word: "Turn off the light", phonetic: "/tɜːrn ɔːf ðə laɪt/", meaning: "关灯", context: "节能减排，准备睡觉。" },
         { word: "Turn on the fan", phonetic: "/tɜːrn ɑːn ðə fæn/", meaning: "开风扇", context: "天气热时的常规操作。" },
-        { word: "Keep quiet", phonetic: "/kiːp ˈkwaɪət/", meaning: "保持安静", context: "需要专注或休息的场合。" },
+        { word: "Keep quiet", phonetic: "/keep ˈkwaɪət/", meaning: "保持安静", context: "需要专注或休息的场合。" },
         { word: "Don't shout", phonetic: "/doʊnt ʃaʊt/", meaning: "不要大喊大叫", context: "提醒注意控制音量。" },
         { word: "Come fast", phonetic: "/kʌm fæst/", meaning: "快点过来", context: "催促对方行动。" },
         { word: "Go slow", phonetic: "/ɡoʊ sloʊ/", meaning: "慢慢走", context: "提醒注意安全或别急。" },
@@ -295,7 +294,58 @@
     const allWords = [...vocabularyList, ...memorizedList];
     const globalAudio = new Audio();
     let currentWordObj = null;
+    let isAudioUnlocked = false; // 音频锁开关
 
+    // 核心改进：播放函数
+    function playAudio(word) {
+        if (!word) return;
+        
+        globalAudio.pause();
+        const encodedWord = encodeURIComponent(word.trim());
+
+        // 统一使用 HTTPS 接口，提高兼容性
+        const sources = [
+            `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`,
+            `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodedWord}`,
+            `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
+        ];
+
+        let sourceIndex = 0;
+
+        const tryPlay = (index) => {
+            if (index >= sources.length) {
+                console.error("所有语音源均失效");
+                return;
+            }
+
+            globalAudio.src = sources[index];
+            globalAudio.load(); // 强制重新加载，解决移动端不更新音频源的问题
+
+            const playPromise = globalAudio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    isAudioUnlocked = true; // 播放成功即解锁
+                }).catch(error => {
+                    console.warn(`源 ${index} 播放失败，尝试切换...`);
+                    tryPlay(index + 1);
+                });
+            }
+        };
+
+        tryPlay(sourceIndex);
+    }
+
+    // 页面交互时解锁音频（针对 iOS/安卓）
+    document.addEventListener('touchstart', function() {
+        if (!isAudioUnlocked) {
+            globalAudio.play().then(() => {
+                globalAudio.pause();
+                isAudioUnlocked = true;
+            }).catch(() => {});
+        }
+    }, { once: true });
+
+    // 以下是原有的 UI 逻辑代码
     function renderCards() {
         const container = document.getElementById('card-container');
         const memContainer = document.getElementById('memorized-card-container');
@@ -313,49 +363,12 @@
                     <div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div>
                     <div style="font-size:0.8rem;color:var(--text-secondary)">${item.context}</div>
                 `;
-                card.onclick = function() {
-                    playAudio(item.word);
-                };
+                card.onclick = () => playAudio(item.word);
                 target.appendChild(card);
             });
         };
-        
         setup(vocabularyList, container);
         setup(memorizedList, memContainer);
-    }
-
-    function playAudio(word) {
-        globalAudio.pause();
-        const encodedWord = encodeURIComponent(word.trim());
-
-        const sources = [
-            `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`, // 优先使用有道
-            `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodedWord}`,
-           `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
-        ];
-
-        let sourceIndex = 0;
-
-        const tryPlay = (index) => {
-            if (index >= sources.length) {
-                console.error("所有语音接口均不可用");
-                return;
-            }
-
-            globalAudio.src = sources[index];
-            globalAudio.currentTime = 0;
-
-            const playPromise = globalAudio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.warn(`源 ${index} 播放失败，尝试切换备用源...`);
-                    tryPlay(index + 1);
-                });
-            }
-        };
-
-        tryPlay(sourceIndex);
     }
 
     function playCurrentWordAudio() {
@@ -429,34 +442,40 @@
     let currentLoopWord = null;
 
     loopBtn.onclick = () => {
-        if (isLooping) {
-            stopLoop();
-        } else {
-            globalAudio.load();
-            startLoop();
-        }
+        isLooping ? stopLoop() : startLoop();
     };
 
-    function startLoop() { isLooping = true; loopBtn.querySelector('.text').innerText = "停止播放"; playNextInLoop(); }
-    function stopLoop() { isLooping = false; clearTimeout(loopTimer); repeatCount = 0; loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
+    function startLoop() { 
+        isLooping = true; 
+        loopBtn.querySelector('.text').innerText = "停止播放"; 
+        playNextInLoop(); 
+    }
+
+    function stopLoop() { 
+        isLooping = false; 
+        clearTimeout(loopTimer); 
+        repeatCount = 0; 
+        loopBtn.querySelector('.text').innerText = "随机循环播放"; 
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); 
+    }
 
     function playNextInLoop() {
         if (!isLooping) return;
-        const container = document.getElementById('card-container');
         if (repeatCount === 0) {
             currentLoopWord = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
         }
-        const item = currentLoopWord;
-        playAudio(item.word);
+        playAudio(currentLoopWord.word);
+        
         document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
-        const activeCard = container.querySelector(`[data-word="${item.word}"]`);
+        const activeCard = document.querySelector(`[data-word="${currentLoopWord.word}"]`);
         if (activeCard) {
             activeCard.classList.add('auto-playing');
             activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
         repeatCount++;
         if (repeatCount >= 3) { repeatCount = 0; }
-        loopTimer = setTimeout(playNextInLoop, 2500);
+        loopTimer = setTimeout(playNextInLoop, 2800); // 稍微延长间隔，确保长句播完
     }
 
     document.getElementById('toggle-memorized-btn').onclick = function() {
