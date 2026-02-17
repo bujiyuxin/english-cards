@@ -300,30 +300,34 @@
 function playAudio(word) {
         if (!word) return;
 
-        // 1. 停止当前播放并清空旧资源
+        // 1. 立即停止并清空，防止旧请求在后台排队
         globalAudio.pause();
         globalAudio.src = "";
-
-        // 2. 对单词进行编码，确保空格处理正确
+        
         const encodedWord = encodeURIComponent(word.trim());
+        // 使用目前对手机端最友好的有道接口
+        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`;
 
-        // 3. 使用有道美式英语接口（type=2 表示美音，这是目前最稳定的美式接口）
-        const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`;
+        // 2. 核心补丁：在赋值 src 之前，先手动触发一下 load
+        // 这样可以提前告诉手机浏览器：“我准备要播放声音了”
+        globalAudio.src = audioUrl;
+        globalAudio.load(); 
 
-        // 4. 赋值并强制加载
-        globalAudio.src = youdaoUrl;
-        globalAudio.load();
-
-        // 5. 尝试播放
+        // 3. 尝试播放
         const playPromise = globalAudio.play();
 
         if (playPromise !== undefined) {
             playPromise.catch(error => {
-                // 如果在线接口都失败（比如没网），最后启用本地内置引擎保底
-                console.warn("在线接口失败，启用系统语音保底");
-                const msg = new SpeechSynthesisUtterance(word);
-                msg.lang = 'en-US';
-                window.speechSynthesis.speak(msg);
+                // 如果是在线接口加载慢导致手机拦截，立即切换到不需要联网的内置引擎
+                console.warn("手机端在线播放受阻，切换内置语音保底");
+                
+                // 确保之前的朗读已取消，避免重叠
+                window.speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
             });
         }
     }
