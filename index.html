@@ -305,9 +305,9 @@
 
         // 统一使用 HTTPS 接口，提高兼容性
         const sources = [
-            `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`,
+            // `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`,
             `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodedWord}`,
-            `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
+            // `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
         ];
 
         let sourceIndex = 0;
