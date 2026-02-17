@@ -329,9 +329,9 @@
         const encodedWord = encodeURIComponent(word.trim());
 
         const sources = [
+            `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`, // 优先使用有道
             `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en-us&q=${encodedWord}`,
-            `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`,
-            `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}&ctp=1&cuid=baiduid`
+           `https://tts.baidu.com/text2audio?lan=en&ie=UTF-8&spd=4&text=${encodedWord}`
         ];
 
         let sourceIndex = 0;
