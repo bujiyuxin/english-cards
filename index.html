@@ -298,40 +298,33 @@
 
     // 核心改进：播放函数
 function playAudio(word) {
-        if (!word) return;
+    if (!word) return;
 
-        // 1. 立即停止并清空，防止旧请求在后台排队
-        globalAudio.pause();
-        globalAudio.src = "";
-        
-        const encodedWord = encodeURIComponent(word.trim());
-        // 使用目前对手机端最友好的有道接口
-        const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodedWord}&type=2`;
+    // 1. 停止并重置当前播放，防止音频重叠
+    globalAudio.pause();
+    globalAudio.src = "";
+    
+    // 2. 格式化文件名逻辑：
+    // - 转为小写
+    // - 将空格替换为下划线
+    // - 移除末尾可能的句号或其他不规范标点（根据图片中 wake_up.mp3 的显示）
+    const fileName = word.toLowerCase()
+                         .trim()
+                         .replace(/\s+/g, '_')   // 空格变下划线
+                         .replace(/[.!?]$/, ''); // 移除结尾的标点符号
 
-        // 2. 核心补丁：在赋值 src 之前，先手动触发一下 load
-        // 这样可以提前告诉手机浏览器：“我准备要播放声音了”
-        globalAudio.src = audioUrl;
-        globalAudio.load(); 
+    // 3. 拼接本地路径
+    const audioUrl = `audio_files/${fileName}.mp3`;
 
-        // 3. 尝试播放
-        const playPromise = globalAudio.play();
+    // 4. 直接加载并播放本地文件
+    globalAudio.src = audioUrl;
+    globalAudio.load(); 
 
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                // 如果是在线接口加载慢导致手机拦截，立即切换到不需要联网的内置引擎
-                console.warn("手机端在线播放受阻，切换内置语音保底");
-                
-                // 确保之前的朗读已取消，避免重叠
-                window.speechSynthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(word);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.8;
-                window.speechSynthesis.speak(utterance);
-            });
-        }
-    }
-
+    globalAudio.play().catch(error => {
+        // 如果播放失败，仅在控制台报错，不使用保底语音
+        console.error("无法找到对应的音频文件，请检查文件名:", audioUrl);
+    });
+}
     // 页面交互时解锁音频（针对 iOS/安卓）
     document.addEventListener('touchstart', function() {
         if (!isAudioUnlocked) {
