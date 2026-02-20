@@ -260,69 +260,105 @@
     </div>
 
 <script>
-    // 数据部分保持不变
     const vocabularyList = [
-        { word: "January", phonetic: "/ˈdʒænjueri/", meaning: "一月", context: "缩写 Jan。新的一年开始。" },
-        { word: "February", phonetic: "/ˈfebrueri/", meaning: "二月", context: "缩写 Feb。最短的一个月。" },
-        { word: "March", phonetic: "/mɑːrtʃ/", meaning: "三月", context: "缩写 Mar。第一季度结束。" },
-        { word: "April", phonetic: "/ˈeɪprəl/", meaning: "四月", context: "缩写 Apr。第二季度开始。" },
-        { word: "May", phonetic: "/meɪ/", meaning: "五月", context: "缩写 May。劳动节假期。" },
-        { word: "June", phonetic: "/dʒuːn/", meaning: "六月", context: "缩写 Jun。半年结束。" },
-        { word: "July", phonetic: "/dʒʊˈlaɪ/", meaning: "七月", context: "缩写 Jul。下半年开始。" },
-        { word: "August", phonetic: "/ˈɔːɡəst/", meaning: "八月", context: "缩写 Aug。盛夏。" },
-        { word: "September", phonetic: "/sepˈtembər/", meaning: "九月", context: "缩写 Sep。开学季。" },
-        { word: "October", phonetic: "/ɑːkˈtoʊbər/", meaning: "十月", context: "缩写 Oct。第四季度开始。" },
-        { word: "November", phonetic: "/noʊˈvembər/", meaning: "十一月", context: "缩写 Nov。电商大促。" },
-        { word: "December", phonetic: "/dɪˈsembər/", meaning: "十二月", context: "缩写 Dec。年底总结。" }
+        { word: "Wake up", phonetic: "/weɪk ʌp/", meaning: "醒来", context: "早晨睁开眼的第一步。" },
+        { word: "Brush your teeth", phonetic: "/brʌʃ jɔːr tiːθ/", meaning: "刷牙", context: "洗漱间的日常清洁。" },
+        { word: "Wash your hands", phonetic: "/wɑːʃ jɔːr hændz/", meaning: "洗手", context: "饭前或便后的卫生习惯。" },
+        { word: "Drink water", phonetic: "/drɪŋk ˈwɔːtər/", meaning: "喝水", context: "保持水分补充。" },
+        { word: "Tie your shoes", phonetic: "/taɪ jɔːr ʃuːz/", meaning: "系鞋带", context: "出门前的准备动作。" },
+        { word: "Comb your hair", phonetic: "/koʊm jɔːr her/", meaning: "梳头", context: "整理仪容仪表。" },
+        { word: "Wear your socks", phonetic: "/wer jɔːr sɑːks/", meaning: "穿袜子", context: "注意脚部保暖。" },
+        { word: "Eat properly", phonetic: "/iːt ˈprɑːpərli/", meaning: "好好吃饭", context: "强调进食礼仪或专注。" },
+        { word: "Finish your food", phonetic: "/ˈfɪnɪʃ jɔːr fuːd/", meaning: "吃完食物", context: "不要浪费粮食。" },
+        { word: "Close the door", phonetic: "/kloʊz ðə dɔːr/", meaning: "关门", context: "保护隐私或隔绝噪音。" },
+        { word: "Pick it up", phonetic: "/pɪk ɪt ʌp/", meaning: "捡起来", context: "把掉在地上的东西拿起来。" },
+        { word: "Keep it back", phonetic: "/kiːp ɪt bæk/", meaning: "放回去", context: "东西用完归位。" },
+        { word: "Hold my hand", phonetic: "/hoʊld maɪ hænd/", meaning: "牵我的手", context: "走在路上注意安全。" },
+        { word: "Turn off the light", phonetic: "/tɜːrn ɔːf ðə laɪt/", meaning: "关灯", context: "节能减排，准备睡觉。" },
+        { word: "Turn on the fan", phonetic: "/tɜːrn ɑːn ðə fæn/", meaning: "开风扇", context: "天气热时的常规操作。" },
+        { word: "Keep quiet", phonetic: "/keep ˈkwaɪət/", meaning: "保持安静", context: "需要专注或休息的场合。" },
+        { word: "Don't shout", phonetic: "/doʊnt ʃaʊt/", meaning: "不要大喊大叫", context: "提醒注意控制音量。" },
+        { word: "Come fast", phonetic: "/kʌm fæst/", meaning: "快点过来", context: "催促对方行动。" },
+        { word: "Go slow", phonetic: "/ɡoʊ sloʊ/", meaning: "慢慢走", context: "提醒注意安全或别急。" },
+        { word: "Bring it here", phonetic: "/brɪŋ ɪt hɪr/", meaning: "拿过来", context: "让对方把物品带到身边。" },
+        { word: "Give me that", phonetic: "/ɡɪv miː ðæt/", meaning: "给我那个", context: "请求或要求获取某物。" },
+        { word: "Take this", phonetic: "/teɪk ðɪs/", meaning: "拿上这个", context: "递给对方某样东西。" },
+        { word: "Put it there", phonetic: "/pʊt ɪt ðer/", meaning: "放在那里", context: "指定物品的摆放位置。" },
+        { word: "Sit straight", phonetic: "/sɪt streɪt/", meaning: "坐端正", context: "纠正坐姿，保护脊椎。" }
     ];
 
     const memorizedList = [
-        { word: "Transformer", phonetic: "/trænsˈfɔːrmər/", meaning: "变压器/变形金刚/AI架构", context: "现代 AI 的基石。现在的 ChatGPT, BERT 全是基于 Transformer 架构的。" },
-        { word: "Token", phonetic: "/ˈtoʊkən/", meaning: "令牌 / 词元", context: "AI 是按 Token 计费的。大概 1000 个 Token 等于 750 个英文单词。" },
-        { word: "Repository", phonetic: "/rɪˈpɑːzətɔːri/", meaning: "仓库", context: "简称 Repo。这是项目在 GitHub 上的'家'，存放所有代码、文件以及修改历史的地方。" },
-        { word: "Inference", phonetic: "/ˈɪnfərəns/", meaning: "推理", context: "使用训练好的模型进行预测或生成内容的过程。" },
-        { word: "Explore", phonetic: "/ɪkˈsplɔːr/", meaning: "探索", context: "常用导航菜单。点击它，你可以发现 GitHub 或 Hugging Face 上目前最热门、最趋势 (Trending) 的项目和模型。" },
-        { word: "Browse", phonetic: "/braʊz/", meaning: "浏览", context: "常用操作。比如 'Browse Files' (浏览文件) 来查看代码库的结构，或者在首页随意翻阅寻找感兴趣的模型。" },
-        { word: "Hugging", phonetic: "/ˈhʌɡɪŋ/", meaning: "拥抱", context: "品牌名 Hugging Face 的前半部分。Logo 是一个张开双手拥抱的笑脸 🤗，代表开源社区的友好互助。" },
-        { word: "Face", phonetic: "/feɪs/", meaning: "脸", context: "品牌名 Hugging Face 的后半部分。在 AI 领域，你也经常会听到 'Face Detection' (人脸识别) 这个词。" },
-        { word: "Language", phonetic: "/ˈlæŋɡwɪdʒ/", meaning: "语言", context: "网站核心筛选条件。虽然界面上常显示复数 Languages，但单数指具体的某一种语言（如 Chinese, Python）。" },
-        { word: "Model", phonetic: "/ˈmɑːdl/", meaning: "模型", context: "导航栏第一项。点击这里浏览所有可下载的 AI 模型库（如 Llama, BERT）。" },
-        { word: "Dataset", phonetic: "/ˈdeɪtəset/", meaning: "数据集", context: "AI 的'粮食'。这里有海量用于训练模型的文本、图片和音频数据。" },
-        { word: "Space", phonetic: "/speɪs/", meaning: "空间 / 应用展示", context: "在线运行 AI 的地方。不需要写代码，点进去就能直接玩各种 AI Demo。" },
-        { word: "Community", phonetic: "/kəˈmjuːnəti/", meaning: "社区", context: "讨论区。你可以在这里提问、参与讨论，或者查看最新的开源活动。" },
-        { word: "Docs", phonetic: "/dɑːks/", meaning: "文档 (Documentation)", context: "说明书。不懂代码怎么写？不懂 API 怎么调？技术问题的答案全在这里。" },
-        { word: "Enterprise", phonetic: "/ˈentərpraɪz/", meaning: "企业版", context: "给公司用的付费服务。提供更高级的数据安全保护和专属技术支持。" },
-        { word: "Pricing", phonetic: "/ˈpraɪsɪŋ/", meaning: "定价 / 价格", context: "想知道租 GPU 跑模型要多少钱？或者升级 Pro 会员要多少钱？看这里。" },
-        { word: "Log In", phonetic: "/lɔːɡ ɪn/", meaning: "登录", context: "进入账户。如果你已经注册过账号了，点这个按钮。" },
-        { word: "Sign Up", phonetic: "/saɪn ʌp/", meaning: "注册", context: "创建新账户。如果你是第一次来，没有账号，点这个按钮。" }
+        { word: "Wake up", phonetic: "/weɪk ʌp/", meaning: "醒来", context: "早晨睁开眼的第一步。" }
     ];
 
     const allWords = [...vocabularyList, ...memorizedList];
     const globalAudio = new Audio();
     let currentWordObj = null;
+    let isAudioUnlocked = false; // 音频锁开关
 
+    // 核心改进：播放函数
+function playAudio(word) {
+    if (!word) return;
+
+    // 1. 停止并重置当前播放，防止音频重叠
+    globalAudio.pause();
+    globalAudio.src = "";
+    
+    // 2. 格式化文件名逻辑：
+    // - 转为小写
+    // - 将空格替换为下划线
+    // - 移除末尾可能的句号或其他不规范标点（根据图片中 wake_up.mp3 的显示）
+    const fileName = word.toLowerCase()
+                         .trim()
+                         .replace(/\s+/g, '_')   // 空格变下划线
+                         .replace(/[.!?]$/, ''); // 移除结尾的标点符号
+
+    // 3. 拼接本地路径
+    const audioUrl = `audio_files/${fileName}.mp3`;
+
+    // 4. 直接加载并播放本地文件
+    globalAudio.src = audioUrl;
+    globalAudio.load(); 
+
+    globalAudio.play().catch(error => {
+        // 如果播放失败，仅在控制台报错，不使用保底语音
+        console.error("无法找到对应的音频文件，请检查文件名:", audioUrl);
+    });
+}
+    // 页面交互时解锁音频（针对 iOS/安卓）
+    document.addEventListener('touchstart', function() {
+        if (!isAudioUnlocked) {
+            globalAudio.play().then(() => {
+                globalAudio.pause();
+                isAudioUnlocked = true;
+            }).catch(() => {});
+        }
+    }, { once: true });
+
+    // 以下是原有的 UI 逻辑代码
     function renderCards() {
         const container = document.getElementById('card-container');
         const memContainer = document.getElementById('memorized-card-container');
         container.innerHTML = '';
         memContainer.innerHTML = '';
+        
         const setup = (list, target) => {
+            if (!list || list.length === 0) return;
             list.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.setAttribute('data-word', item.word);
-                card.innerHTML = `<div><b>${item.word}</b> <small>${item.phonetic}</small></div><div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div><div style="font-size:0.8rem;color:var(--text-secondary)">${item.context}</div>`;
-                card.onclick = () => { playAudio(item.word); };
+                card.innerHTML = `
+                    <div><b>${item.word}</b> <small>${item.phonetic}</small></div>
+                    <div style="color:var(--primary-color);margin:5px 0">${item.meaning}</div>
+                    <div style="font-size:0.8rem;color:var(--text-secondary)">${item.context}</div>
+                `;
+                card.onclick = () => playAudio(item.word);
                 target.appendChild(card);
             });
         };
         setup(vocabularyList, container);
         setup(memorizedList, memContainer);
-    }
-
-    function playAudio(word) {
-        globalAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
-        globalAudio.play().catch(()=>{});
     }
 
     function playCurrentWordAudio() {
@@ -396,34 +432,40 @@
     let currentLoopWord = null;
 
     loopBtn.onclick = () => {
-        if (isLooping) {
-            stopLoop();
-        } else {
-            globalAudio.load();
-            startLoop();
-        }
+        isLooping ? stopLoop() : startLoop();
     };
 
-    function startLoop() { isLooping = true; loopBtn.querySelector('.text').innerText = "停止播放"; playNextInLoop(); }
-    function stopLoop() { isLooping = false; clearTimeout(loopTimer); repeatCount = 0; loopBtn.querySelector('.text').innerText = "随机循环播放"; document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); }
+    function startLoop() { 
+        isLooping = true; 
+        loopBtn.querySelector('.text').innerText = "停止播放"; 
+        playNextInLoop(); 
+    }
+
+    function stopLoop() { 
+        isLooping = false; 
+        clearTimeout(loopTimer); 
+        repeatCount = 0; 
+        loopBtn.querySelector('.text').innerText = "随机循环播放"; 
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing')); 
+    }
 
     function playNextInLoop() {
         if (!isLooping) return;
-        const container = document.getElementById('card-container');
         if (repeatCount === 0) {
             currentLoopWord = vocabularyList[Math.floor(Math.random() * vocabularyList.length)];
         }
-        const item = currentLoopWord;
-        playAudio(item.word);
+        playAudio(currentLoopWord.word);
+        
         document.querySelectorAll('.card').forEach(c => c.classList.remove('auto-playing'));
-        const activeCard = container.querySelector(`[data-word="${item.word}"]`);
+        const activeCard = document.querySelector(`[data-word="${currentLoopWord.word}"]`);
         if (activeCard) {
             activeCard.classList.add('auto-playing');
             activeCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+
         repeatCount++;
         if (repeatCount >= 3) { repeatCount = 0; }
-        loopTimer = setTimeout(playNextInLoop, 2500);
+        loopTimer = setTimeout(playNextInLoop, 2800); // 稍微延长间隔，确保长句播完
     }
 
     document.getElementById('toggle-memorized-btn').onclick = function() {
